@@ -1,0 +1,290 @@
+<!-- <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+
+<script>
+
+	function openSignalingChannel(channel)
+	{
+	   var socket = io.connect('http://localhost:8888/' + channel);
+	}
+
+	function createOffer()
+	{
+	   var peer = new RTCPeerConnection(...);
+	   peer.createOffer(onSuccess);
+	}
+
+	function createAnswer(offer_sdp)
+	{
+	   var peer = new RTCPeerConnection(...);
+	   peer.setRemoteDescription(offer_sdp);
+	   peer.createAnswer(onSuccess);
+	}
+
+
+	var channel = openSignalingChannel('default-channel');
+	channel.onmessage = function(message)
+	{
+	   if(message.participationRequest) {}
+	   if(message.sharingRoomDetails) {}
+	};
+
+  var socket = io.connect('http://localhost:8080');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script> -->
+
+<!doctype html>
+<html>
+  <head>
+
+    <style>
+
+    /***FIRST STYLE THE BUTTON***/
+input#bigbutton {
+width:500px;
+background: #3e9cbf; /*the colour of the button*/
+padding: 8px 14px 10px; /*apply some padding inside the button*/
+border:1px solid #3e9cbf; /*required or the default border for the browser will appear*/
+cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+/*style the text*/
+font-size:1.5em;
+font-family:Oswald, sans-serif; /*Oswald is available from http://www.google.com/webfonts/specimen/Oswald*/
+letter-spacing:.1em;
+text-shadow: 0 -1px 0px rgba(0, 0, 0, 0.3); /*give the text a shadow - doesn't appear in Opera 12.02 or earlier*/
+color: #fff;
+/*use box-shadow to give the button some depth - see cssdemos.tupence.co.uk/box-shadow.htm#demo7 for more info on this technique*/
+-webkit-box-shadow: inset 0px 1px 0px #3e9cbf, 0px 5px 0px 0px #205c73, 0px 10px 5px #999;
+-moz-box-shadow: inset 0px 1px 0px #3e9cbf, 0px 5px 0px 0px #205c73, 0px 10px 5px #999;
+box-shadow: inset 0px 1px 0px #3e9cbf, 0px 5px 0px 0px #205c73, 0px 10px 5px #999;
+/*give the corners a small curve*/
+-moz-border-radius: 10px;
+-webkit-border-radius: 10px;
+border-radius: 10px;
+}
+/***SET THE BUTTON'S HOVER AND FOCUS STATES***/
+input#bigbutton:hover, input#bigbutton:focus {
+color:#dfe7ea;
+/*reduce the size of the shadow to give a pushed effect*/
+-webkit-box-shadow: inset 0px 1px 0px #3e9cbf, 0px 2px 0px 0px #205c73, 0px 2px 5px #999;
+-moz-box-shadow: inset 0px 1px 0px #3e9cbf, 0px 2px 0px 0px #205c73, 0px 2px 5px #999;
+box-shadow: inset 0px 1px 0px #3e9cbf, 0px 2px 0px 0px #205c73, 0px 2px 5px #999;
+}
+</style>
+	<script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+
+<script src="https://cdn.temasys.com.sg/adapterjs/latest/adapter.debug.js"></script>
+
+<script>
+
+
+/**
+ * WebRTC module for YUI
+ *
+ */
+
+
+var WebRTC = new function () {
+    /**
+     * This is the server that finds the external ip address when the client is behind a NAT
+     */
+    this.DEFAULT_STUN_SERVER = {url: 'stun:stun.l.google.com:19302'};
+
+    var thisWebRTC = this;
+
+    var already_called = false;
+    /**
+     * The socket.io connection to the server that is used for handshaking between two clients.
+     */
+    this._socket = io.connect();
+
+    this._socket.on('add_answer', function (data) {
+
+    	console.log(data);
+    	window.d = data;
+    	thisWebRTC._pc.setRemoteDescription( new RTCSessionDescription(data.answer), function() {
+
+
+
+			console.log("CONNECTION ESTABLISHED HAZA!");
+
+    	});
+
+    });
+
+
+
+		this._socket.on('ice_send-host', function (data) {
+            console.log("ICE SENT!");
+            window.can = data;
+            thisWebRTC._pc.addIceCandidate( new RTCIceCandidate (data.candidate));
+        
+
+        });
+
+
+    /**
+     * The type of connection this will be.
+     *
+     * @param type {String} Either media, data, or both.
+     */
+    this._type =  '';
+
+    /**
+     * The video DOM element that displays the local video stream.
+     */
+    this._localStreamElement =  $('#vid1');
+
+    /**
+     * The video DOM elements that display each external video stream.
+     */
+    this._remoteStreamElements = [];
+
+    /**
+     * The local stream object recieved from getUserMedia
+     */
+    this._localStream =  null;
+
+    this._pc = null;
+
+
+  var offerAnswerConstraints = {
+      optional: [],
+      mandatory: {
+          minHeight : '1080',
+          minWidth : '1920',
+          minFrameRate : '120'
+      }
+  };
+
+
+    this.startStream = function(callback) {
+	var thisWebRTC = this;
+
+	getScreenId(function (error, sourceId, screen_constraints) {
+
+	    navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+	    navigator.getUserMedia(screen_constraints, function (stream) {
+	    	window.foo = stream;
+        window.bar = screen_constraints;
+
+	    	thisWebRTC._localStream = stream;
+	    	thisWebRTC._localStreamElement.src = stream;
+
+	    	thisWebRTC.initWebRTC(stream);
+
+	            //attachMediaStream(thisWebRTC._localStreamElement, thisWebRTC._localStream);
+
+	            //callback();
+	        //document.querySelector('video').src = URL.createObjectURL(stream);
+	    }, function (error) {
+	        console.error(error);
+	    });
+	});
+	};
+
+
+	this.initWebRTC = function(stream) {
+		var thisWebRTC = this;
+
+		var configuration = {'iceServers': [this.DEFAULT_STUN_SERVER]};
+		//var pc = thisWebRTC._pc;
+		thisWebRTC._pc = new RTCPeerConnection(configuration);
+		thisWebRTC._pc.addStream(stream);
+
+		thisWebRTC._pc.createOffer(function(desc) {
+			thisWebRTC._pc.setLocalDescription(desc);
+		thisWebRTC._pc.onicecandidate = function (event) {
+
+
+			console.log("ICE NUMBER " + event);
+		                if (event.candidate) {
+		                	console.log("ICE DETECTED!");
+		                    thisWebRTC._socket.emit('ice', {
+		              
+		                        'candidate': event.candidate
+		                    });
+		                }
+		            };
+
+
+
+			console.log(desc);
+			thisWebRTC.sendOffer(desc);
+
+
+
+
+
+
+
+		}, function(fail){console.log("fail " + fail)}, offerAnswerConstraints );
+
+
+
+	};
+
+	this.sendOffer = function (desc) {
+		var thisWebRTC = this;
+		console.log( "Sending Offer ------> ");
+		thisWebRTC._socket.emit('send_offer', {
+			'offer' : desc
+		});
+
+
+	};
+
+
+};
+
+
+</script>
+
+
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+<div style="margin-top:100px; text-align: center;" >
+
+<input id="bigbutton" type="submit" value="Start Stream" onclick="WebRTC.startStream()" />
+
+</div>
+
+      	<script src="//cdn.WebRTC-Experiment.com/getScreenId.js"></script>
+<!-- <video controls autoplay></video> -->
+<script>
+/*getScreenId(function (error, sourceId, screen_constraints) {
+    navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+    navigator.getUserMedia(screen_constraints, function (stream) {
+    	window.foo = stream;
+        //document.querySelector('video').src = URL.createObjectURL(stream);
+    }, function (error) {
+        console.error(error);
+    });
+});*/
+</script>
+
+  	        <div id="streams">
+            <video id="vid1" width="200px"></video>
+        </div>
+
+
+    <!-- <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form> -->
+  </body>
+</html>
