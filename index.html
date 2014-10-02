@@ -38,6 +38,8 @@
 <!doctype html>
 <html>
   <head>
+        <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/ajhifddimkapgcifgcodmmfdlknahffk">
+
 
     <style>
 
@@ -181,6 +183,7 @@ var WebRTC = new function () {
 	            //callback();
 	        //document.querySelector('video').src = URL.createObjectURL(stream);
 	    }, function (error) {
+          alert("ERROR: Extension not installed. Please click the extension install button and refresh page.")
 	        console.error(error);
 	    });
 	});
@@ -257,6 +260,23 @@ var WebRTC = new function () {
     </style>
   </head>
   <body>
+
+ <button onclick="" id="install-button" style="padding: 0;background: none;height: 61px;vertical-align: middle;cursor:pointer;">
+            <img src="https://www.webrtc-experiment.com/images/btn-install-chrome-extension.png" alt="Add to Chrome">
+        </button>
+
+        <script>
+            document.querySelector('#install-button').onclick = function() {
+        
+               
+                  open('https://chrome.google.com/webstore/detail/ajhifddimkapgcifgcodmmfdlknahffk');
+              
+            };
+
+        </script>
+
+
+
 <div style="margin-top:100px; text-align: center;" >
 
 <input id="bigbutton" type="submit" value="Start Stream" onclick="WebRTC.startStream()" />

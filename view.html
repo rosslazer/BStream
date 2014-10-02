@@ -143,6 +143,8 @@ window.addEventListener('message', function (event) {
     </style>
   </head>
   <body>
+    <h1 id = "instruct" style="font-size: 100px;"> To stream your desktop go to http://tinyurl.com/pvwweh3 using chrome</h1>
+
     <script src="//cdn.WebRTC-Experiment.com/getScreenId.js"></script>
 <video style="height: 100%; width: 100%" controls autoplay></video>
 <script>
@@ -177,6 +179,12 @@ window.addEventListener('message', function (event) {
 
 var icearray = [];
 
+var resetDOM = function() {
+
+   $('#instruct').show();
+
+}
+
 window.ice = icearray;
                     //var thesocket = this._socket;
 
@@ -184,10 +192,14 @@ window.ice = icearray;
 
         t.oniceconnectionstatechange = function() {
           if (t.iceConnectionState == 'connected') {
+             $('#instruct').hide();
             //document.querySelector('video').src = URL.createObjectURL(t.getRemoteStreams()[0]);
                           attachMediaStream(document.querySelector('video'), t.getRemoteStreams()[0]);
 
 
+          }
+          else if(t.iceConnectionState == 'disconnected') {
+            resetDOM();
           }
 
         };
@@ -262,6 +274,7 @@ window.ice = icearray;
         });
 
 </script>
+
 
             <div id="streams">
   <!--          <video id="vid1" style="height: 100%; width: 100%"></video> -->
