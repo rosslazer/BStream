@@ -135,7 +135,7 @@ window.addEventListener('message', function (event) {
     <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; background-image: url('http://20wattsmag.com/wp-content/uploads/2013/03/SUQuad0001.jpg');     background-repeat: no-repeat;    background-size: 100% 100%;
+      .wrapper { font: 13px Helvetica, Arial; background-image: url('http://20wattsmag.com/wp-content/uploads/2013/03/SUQuad0001.jpg');     background-repeat: no-repeat;    background-size: auto;
 
 
  }
@@ -151,7 +151,7 @@ opacity: 0.8; text-align: center;}
 
 
   </head>
-  <body>
+  <body class = "wrapper">
     <h1 id = "instruct" style="font-size: 100px;"> To stream your desktop go to http://tinyurl.com/pvwweh3 using chrome</h1>
 
     <script src="//cdn.WebRTC-Experiment.com/getScreenId.js"></script>
@@ -172,6 +172,13 @@ opacity: 0.8; text-align: center;}
 
     var thesocket = io.connect();
 
+
+$(document).ready(function(){ /*code here*/ 
+  
+                    $('video').hide();
+                       $('#instruct').show();
+
+  });
 
    
 
@@ -194,6 +201,7 @@ var resetDOM = function() {
 
 }
 
+
 window.ice = icearray;
                     //var thesocket = this._socket;
 
@@ -210,6 +218,8 @@ window.ice = icearray;
           }
           else if(t.iceConnectionState == 'disconnected') {
             $('video').hide()
+            $('body').toggleClass('wrapper');
+            $('body').toggleClass('wrapper');
             resetDOM();
           }
 
