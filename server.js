@@ -5,7 +5,17 @@ var https = require('https');
 var app = require('express')();
 //app.listen(3000)
 
+function ensureSecure(req, res, next){
+  if(req.secure){
+    // OK, continue
+    return next();
+  };
+  res.redirect('https://'+req.host+req.url); // handle port numbers if you need non defaults
+};
 
+app.all('*', ensureSecure); // at top of routing calls
+
+http.createServer(app).listen(80)
 
 var https      = require("https");
 var fs         = require("fs");
@@ -24,8 +34,11 @@ https.globalAgent.options.rejectUnauthorized = false;
   //  console.log('Listening on port %d', server.address().port);
 //});
 
+// set up plain http server
 
-var server = https.createServer(config,app).listen(3000);
+
+
+var server = https.createServer(config,app).listen(443);
 
 var io = require('socket.io').listen(server);
 
