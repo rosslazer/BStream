@@ -6,6 +6,7 @@
   "dependencies": {
     "express": "4.x",
     "jade" : "1.x",
-    "socket.io" : "1.x"
+    "socket.io" : "1.x",
+    "mongoose" : "3.8.x"
   }
 }
