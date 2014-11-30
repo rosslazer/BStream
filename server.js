@@ -6,6 +6,22 @@ var app = require('express')();
 //app.listen(3000)
 
 
+var passport = require('passport'),
+    LocalStrategy = require('passport-local'),
+    cookieParser = require('cookie-parser'),
+    methodOverride = require('method-override'),
+    session = require('express-session'),
+    bodyParser = require('body-parser');
+
+
+//passport stuff
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 
@@ -22,6 +38,23 @@ var config     = {
 https.globalAgent.options.rejectUnauthorized = false;
 
 
+// Session-persisted message middleware
+
+app.use(function(req, res, next){
+  var err = req.session.error,
+      msg = req.session.notice,
+      success = req.session.success;
+
+  delete req.session.error;
+  delete req.session.success;
+  delete req.session.notice;
+
+  if (err) res.locals.error = err;
+  if (msg) res.locals.notice = msg;
+  if (success) res.locals.success = success;
+
+  next();
+});
 //var server = app.listen(3000, function() {
   //  console.log('Listening on port %d', server.address().port);
 //});
