@@ -17,19 +17,31 @@ var UserSchema = new Schema({
 
 
 
-var DeviceScehma = new Schema({
+
+var RoomSchema = new Schema({
+
     name  :  String, 
     room : String,
+		floor: String,
     building : String,
     id: String,
-    inUse: Boolean,
-    lastused  :  Date
-});
+    lastused  :  Date,
+		viewerConnected : Boolean,
+		inUse : Boolean,
+		latitude : Number,
+		longitude: Number
+		});
 
 
-var User = mongoose.model('User', UserSchema)
-var Device = mongoose.model('Device', DeviceScehma)
 
+
+
+var User = mongoose.model('User', UserSchema);
+exports.Room = mongoose.model('Room', RoomSchema);
+
+
+
+/*
 exports.createUser = function(un, pwd, em, rl) {
     var newuser = new User({username: un, password: pwd, email: em, role: rl});
     newuser.save(function (err, obj) {
@@ -63,4 +75,4 @@ exports.authUser = function(un, pwd, done) {
 
 
 
-}
+}*/

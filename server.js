@@ -100,7 +100,11 @@ app.get('/viewer', function (req, res) {
   res.sendfile(__dirname + '/view.html');
 });
 
+app.get('/viewer/:name', function(req,res){
 
+
+	res.send("HERRO");
+});
 
 io.sockets.on('connection', function(socket) {
 
