@@ -1,0 +1,316 @@
+<!-- <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+
+<script>
+
+  function openSignalingChannel(channel)
+  {
+     var socket = io.connect('http://localhost:8888/' + channel);
+  }
+
+  function createOffer()
+  {
+     var peer = new RTCPeerConnection(...);
+     peer.createOffer(onSuccess);
+  }
+
+  function createAnswer(offer_sdp)
+  {
+     var peer = new RTCPeerConnection(...);
+     peer.setRemoteDescription(offer_sdp);
+     peer.createAnswer(onSuccess);
+  }
+
+
+  var channel = openSignalingChannel('default-channel');
+  channel.onmessage = function(message)
+  {
+     if(message.participationRequest) {}
+     if(message.sharingRoomDetails) {}
+  };
+
+  var socket = io.connect('http://localhost:8080');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script> -->
+
+<!doctype html>
+<html>
+  <head>
+  <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+
+<script>
+//DetectRTC.js
+// todo: need to check exact chrome browser because opera also uses chromium framework
+var isChrome = !!navigator.webkitGetUserMedia;
+
+// DetectRTC.js - https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DetectRTC
+// Below code is taken from RTCMultiConnection-v1.8.js (http://www.rtcmulticonnection.org/changes-log/#v1.8)
+var DetectRTC = {};
+
+(function () {
+    var screenCallback;
+
+    DetectRTC.screen = {
+        chromeMediaSource: 'screen',
+        getSourceId: function (callback) {
+            if (!callback) throw '"callback" parameter is mandatory.';
+            screenCallback = callback;
+            window.postMessage('get-sourceId', '*');
+        },
+        isChromeExtensionAvailable: function (callback) {
+            if (!callback) return;
+
+            if (DetectRTC.screen.chromeMediaSource == 'desktop') callback(true);
+
+            // ask extension if it is available
+            window.postMessage('are-you-there', '*');
+
+            setTimeout(function () {
+                if (DetectRTC.screen.chromeMediaSource == 'screen') {
+                    callback(false);
+                } else callback(true);
+            }, 2000);
+        },
+        onMessageCallback: function (data) {
+            console.log('chrome message', data);
+
+            // "cancel" button is clicked
+            if (data == 'PermissionDeniedError') {
+                DetectRTC.screen.chromeMediaSource = 'PermissionDeniedError';
+                if (screenCallback) return screenCallback('PermissionDeniedError');
+                else throw new Error('PermissionDeniedError');
+            }
+
+            // extension notified his presence
+            if (data == 'rtcmulticonnection-extension-loaded') {
+                DetectRTC.screen.chromeMediaSource = 'desktop';
+            }
+
+            // extension shared temp sourceId
+            if (data.sourceId) {
+                DetectRTC.screen.sourceId = data.sourceId;
+                if (screenCallback) screenCallback(DetectRTC.screen.sourceId);
+            }
+        }
+    };
+
+    // check if desktop-capture extension installed.
+    if (window.postMessage && isChrome) {
+        DetectRTC.screen.isChromeExtensionAvailable();
+    }
+})();
+
+window.addEventListener('message', function (event) {
+    if (event.origin != window.location.origin) {
+        return;
+    }
+
+    DetectRTC.screen.onMessageCallback(event.data);
+});
+
+
+/*  var socket = io();
+  $('form').submit(function(){
+    socket.emit('send', $('#m').val());
+    $('#m').val('');
+    return false;
+  });
+  socket.on('message', function(msg){
+    window.foo = msg;
+
+    $('#messages').append($('<li>').text(msg));
+  });*/
+</script>
+<script src="https://cdn.temasys.com.sg/adapterjs/latest/adapter.debug.js"></script>
+
+
+
+
+    <title>Socket.IO chat</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .wrapper { font: 13px Helvetica, Arial; background: url('http://20wattsmag.com/wp-content/uploads/2013/03/SUQuad0001.jpg') no-repeat center center fixed;   -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+
+
+ }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      h1 {font-family: 'Open Sans', sans-serif;color: white;
+opacity: 0.8; text-align: center;}
+    </style>
+
+
+  </head>
+  <body class = "wrapper">
+    <h1 id = "instruct" style="font-size: 100px;"> To stream your desktop go to http://tinyurl.com/pvwweh3 using chrome</h1>
+
+    <script src="//cdn.WebRTC-Experiment.com/getScreenId.js"></script>
+<video style="height: 100%; width: 100%" controls autoplay></video>
+<script>
+/*getScreenId(function (error, sourceId, screen_constraints) {
+    navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+    navigator.getUserMedia(screen_constraints, function (stream) {
+      window.foo = stream;
+        //document.querySelector('video').src = URL.createObjectURL(stream);
+    }, function (error) {
+        console.error(error);
+    });
+});*/
+</script>
+
+<script>
+
+    var current = window.location.href;
+    roomid = current.split('/')[4];
+
+    var thesocket = io.connect('/' + roomid);
+
+
+$(document).ready(function(){ /*code here*/ 
+  
+                    $('video').hide();
+                       $('#instruct').show();
+
+  });
+
+   
+
+        thesocket.on('add_desc', function (data) {
+
+            window.foo = data;
+   console.log(data);
+   DEFAULT_STUN_SERVER = {url: 'stun:stun.l.google.com:19302'};
+
+   var remoteconfiguration = {iceServers: [{url: 'stun:stun.l.google.com:19302'}]};
+
+
+
+
+var icearray = [];
+
+var resetDOM = function() {
+
+   $('#instruct').show();
+
+}
+
+
+window.ice = icearray;
+                    //var thesocket = this._socket;
+
+        var t = new RTCPeerConnection(remoteconfiguration, null);
+
+        t.oniceconnectionstatechange = function() {
+          if (t.iceConnectionState == 'connected') {
+             $('#instruct').hide();
+             $('video').show();
+            //document.querySelector('video').src = URL.createObjectURL(t.getRemoteStreams()[0]);
+                          attachMediaStream(document.querySelector('video'), t.getRemoteStreams()[0]);
+
+
+          }
+          else if(t.iceConnectionState == 'disconnected') {
+            $('video').hide()
+            $('body').toggleClass('wrapper');
+            $('body').toggleClass('wrapper');
+            resetDOM();
+          }
+
+        };
+
+
+
+          //t.onaddstream = function (evt) {
+            // console.log("THE STREAM IS HERE");
+             //$('#vid1').src = URL.createObjectURL(evt.stream);
+             // attachMediaStream(document.querySelector('video'), evt.stream);
+          // };
+
+
+         // t.onaddstream = function (evt) {
+         //    console.log("THE STREAM IS HERE");
+         //    //$('#vid1').src = URL.createObjectURL(evt.stream);
+         //     document.querySelector('video').src = URL.createObjectURL(evt.stream);
+         //  };
+
+
+
+             thesocket.on('ice_send', function (data) {
+            console.log("ICE SENT!");
+            window.can = data;
+            icearray.push(data.candidate);
+            t.addIceCandidate( new RTCIceCandidate (data.candidate));
+                        console.log(t);
+                        window.bar = t;
+        
+
+        });
+
+
+
+
+        t.onicecandidate = function (event) {
+
+
+            console.log("ICE NUMBER " + event);
+                        if (event.candidate) {
+                            console.log("ICE DETECTED!");
+                            thesocket.emit('ice-to-host', {
+                      
+                                'candidate': event.candidate
+                            });
+                        }
+                    };
+
+
+        t.setRemoteDescription(new RTCSessionDescription(data.offer), function() {
+            var ttwo = this;
+
+
+       
+
+
+
+            console.log("Created " + t);
+            t.createAnswer(function(answer) {
+                console.log("THE ANSWER IS " + answer);
+                var thatanswer = answer;
+                t.setLocalDescription(answer, function() {
+                    console.log("sending answer");
+                    console.log(thatanswer);
+                    thesocket.emit('send_answer', {
+                        'answer' : thatanswer
+                    });
+                });
+            },  function(data){console.log(data);} );
+        });
+        console.log(t);
+        });
+
+</script>
+
+
+            <div id="streams">
+  <!--          <video id="vid1" style="height: 100%; width: 100%"></video> -->
+        </div>
+
+
+    <!-- <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form> -->
+  </body>
+</html>
