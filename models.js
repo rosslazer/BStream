@@ -36,8 +36,9 @@ var RoomSchema = new Schema({
 
 
 
-var User = mongoose.model('User', UserSchema);
+exports.User = mongoose.model('User', UserSchema);
 exports.Room = mongoose.model('Room', RoomSchema);
+
 
 
 

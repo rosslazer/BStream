@@ -6,6 +6,8 @@ var app = require('express')();
 //app.listen(3000)
 
 
+
+
 var passport = require('passport'),
     LocalStrategy = require('passport-local'),
     cookieParser = require('cookie-parser'),
@@ -22,6 +24,23 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    db.User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+      if (!user.validPassword(password)) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    });
+  }
+));
+
 
 
 
