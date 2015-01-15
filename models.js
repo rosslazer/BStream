@@ -42,6 +42,8 @@ exports.Room = mongoose.model('Room', RoomSchema);
 
 
 
+
+
 /*
 exports.createUser = function(un, pwd, em, rl) {
     var newuser = new User({username: un, password: pwd, email: em, role: rl});

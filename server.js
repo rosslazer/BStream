@@ -7,7 +7,7 @@ var app = require('express')();
 
 
 
-
+//begin passport stuff
 var passport = require('passport'),
     LocalStrategy = require('passport-local'),
     cookieParser = require('cookie-parser'),
@@ -33,7 +33,9 @@ passport.use(new LocalStrategy(
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       }
-      if (!user.validPassword(password)) {
+//      if (!user.validPassword(password)) {
+      if (user.password != password) {
+
         return done(null, false, { message: 'Incorrect password.' });
       }
       return done(null, user);
@@ -42,6 +44,13 @@ passport.use(new LocalStrategy(
 ));
 
 
+app.post('/login',
+  passport.authenticate('local', { successRedirect: '/',
+                                   failureRedirect: '/login',
+                                   failureFlash: false })
+);
+
+//end passport stuff
 
 
 var https      = require("https");
